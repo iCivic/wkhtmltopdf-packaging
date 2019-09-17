@@ -1,7 +1,45 @@
+# prefix used in determining full image name in "docker-images" and "compile-docker"
 docker-prefix: wkhtmltopdf/packaging:0.12_
 qemu-cmd:      docker run --rm --privileged multiarch/qemu-user-static:register --reset
 
+# all targets supported by the docker-related commands, keys are as follows:
+#
+#   source:         Dockerfile used to build image
+#   output:         one of deb, rpm, tar or 7z
+#   args:           build-time docker args (optional)
+#   arch:           used as arch specified to fpm (for deb or rpm output)
+#   depend:         dependent packages specified to fpm (for deb or rpm output)
+#   qt_config:      override the qt configuration used for building Qt (optional)
+#   cross_compile:  use given prefix for cross-compilation (optional)
+#   qemu:           set to true if qemu emulation is required (optional)
+#
 docker-targets:
+  stretch-arm64v8:
+    source: docker/Dockerfile.debian
+    args:
+      from: arm64v8/debian:stretch
+    output: deb
+    qemu:   true
+    arch:   aarch64
+    qt_config:      armv8-64
+    cross_compile:  arm-linux-gnueabihf-
+    depend: >
+      ca-certificates
+      fontconfig
+      libc6
+      libfreetype6
+      libjpeg62-turbo
+      libpng16-16
+      libssl1.1
+      libstdc++6
+      libx11-6
+      libxcb1
+      libxext6
+      libxrender1
+      xfonts-75dpi
+      xfonts-base
+      zlib1g
+      
   stretch-amd64:
     source: docker/Dockerfile.debian
     args:
@@ -470,6 +508,9 @@ qt-config:
     -no-sse4.2
     -no-avx
     -no-neon
+  armv8-64: >
+    -xplatform linux-arm-gnueabihf-g++
+    -DQT_ARCH_ARM
   mingw-w64: >
     -silent
     -openssl-linked

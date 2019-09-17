@@ -5,6 +5,7 @@ ARG  jpeg=libjpeg-dev
 ARG  ssl=libssl-dev
 ENV  CFLAGS=-w CXXFLAGS=-w
 
+COPY ./sources.list /etc/apt/sources.list
 RUN apt-get update && apt-get install -y -q --no-install-recommends \
     build-essential \
     libfontconfig1-dev \
@@ -17,4 +18,6 @@ RUN apt-get update && apt-get install -y -q --no-install-recommends \
     libxrender-dev \
     python \
     zlib1g-dev \
-    && rm -rf /var/lib/apt/lists/*
+    g++-arm-linux-gnueabihf \
+    && rm -rf /var/lib/apt/lists/* \
+    && export MAKE=/usr/bin/make

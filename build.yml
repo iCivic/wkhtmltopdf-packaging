@@ -492,7 +492,6 @@ qt-config:
     -fast
     -release
     -static
-    -graphicssystem raster
     -webkit
     -exceptions
     -xmlpatterns
@@ -566,7 +565,17 @@ qt-config:
     -no-avx
     -no-neon
   armv8-64: >
-    -xplatform linux-arm-gnueabihf-g++
+    -xplatform qws/linux-arm-gnueabihf-g++
+    -sysroot
+    -force-pkg-config
+    -no-glib
+    -no-xmlpatterns
+    -no-rpath
+    -I /opt/tslib1.4/include
+    -I /usr/include
+    -I /usr/arm-linux-gnueabihf/include
+    -L /opt/tslib1.4/lib
+    -L /usr/arm-linux-gnueabihf/lib
     -DQT_ARCH_ARM
   mingw-w64: >
     -silent

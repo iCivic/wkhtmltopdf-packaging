@@ -4,20 +4,74 @@ FROM ${from}
 ARG  jpeg=libjpeg-dev
 ARG  ssl=libssl-dev
 ENV  CFLAGS=-w CXXFLAGS=-w
+ENV  TSLIB_ROOT=/opt/tslib1.4
+ENV  PKG_CONFIG_PATH=$TSLIB_ROOT/lib/pkgconfig:$PKG_CONFIG_PATH
+ENV  LD_LIBRARY_PATH=$TSLIB_ROOT/lib:$LD_LIBRARY_PATH
+ENV  QMAKE_INCDIR_X11=/usr/include/X11
+ENV  QMAKE_LIBDIR_X11=/usr/lib/X11
+ENV  QMAKESPEC=linux-arm-gnueabihf-g++
 
 COPY ./sources.list /etc/apt/sources.list
+COPY ./tslib-1.4.tar.gz /opt
 RUN apt-get update && apt-get install -y -q --no-install-recommends \
-    build-essential \
+    build-essential automake autoconf libtool \
     libfontconfig1-dev \
     libfreetype6-dev \
     $jpeg \
     libpng-dev \
     $ssl \
+    libxcursor-dev \
+    libxfixes-dev \
+    libxft-dev \
+    libxi-dev \
+    libxrandr-dev \
+    libxrender-dev \
     libx11-dev \
     libxext-dev \
-    libxrender-dev \
+    libxtst-dev \
+    libavahi-gobject-dev \
+    libsm-dev \
+    libfontconfig-dev \	
     python \
     zlib1g-dev \
+    g++ \
+	gcc-arm-linux-gnueabihf \
     g++-arm-linux-gnueabihf \
+	qt4-qmake \
+	pkg-config \
+	xorg-dev \
+	qt4-dev-tools \
+	libstdc++ \
+	libstdc++6-armhf-cross \
+	libstdc++-6-dev-arm64-cross \
+	libc6-armhf-cross  \
+	libc6-dev-armhf-cross \ 
+	linux-libc-dev-armhf-cross \
     && rm -rf /var/lib/apt/lists/* \
-    && export MAKE=/usr/bin/make
+    && export MAKE=/usr/bin/make \
+    && ln -s /usr/arm-linux-gnueabihf/lib/ld-linux-armhf.so.3 /lib/ld-linux-armhf.so.3 \
+    && arm-linux-gnueabihf-g++ --version
+
+RUN cd /opt \
+    && tar -zvxf tslib-1.4.tar.gz \ 
+    && cd tslib \
+    && ./autogen.sh \
+    && ./configure CC=arm-linux-gnueabihf-gcc CXX=arm-linux-gnueabihf-g++ --host=arm-none-linux-gnueabi --prefix=/opt/tslib1.4 ac_cv_func_malloc_0_nonnull=yes \
+    && make \
+    && make install \
+    && echo "export TSLIB_ROOT=/opt/tslib1.4" >> ~/.bashrc \
+    && echo "export PKG_CONFIG_PATH=$TSLIB_ROOT/lib/pkgconfig:$PKG_CONFIG_PATH" >> ~/.bashrc \
+    && echo "export LD_LIBRARY_PATH=$TSLIB_ROOT/lib:$LD_LIBRARY_PATH" >> ~/.bashrc \
+	&& echo "export LD_LIBRARY_PATH=/usr/arm-linux-gnueabihf/lib/:/usr/lib/aarch64-linux-gnu/:$LD_LIBRARY_PATH" >> ~/.bashrc \
+	&& echo "export PATH=/usr/arm-linux-gnueabihf/bin:$PATH" >> ~/.bashrc
+	
+
+# Qt for X11 Requirements
+# https://doc.qt.io/archives/qt-4.8/requirements-x11.html
+# 从零开始移植QT4.8.5之二--在linux下安装QT
+# https://blog.csdn.net/andylauren/article/details/51996301
+# XLib Error when compiling QT for ARM using linux-arm-gnueabi-g++
+# https://stackoverflow.com/questions/14076247/xlib-error-when-compiling-qt-for-arm-using-linux-arm-gnueabi-g
+# configure: add -pkg-config option to control pkg-config usage
+# https://git.merproject.org/mer-core/qtbase/commit/0991eae04871f1cb4a6d149658354bf129367074
+
